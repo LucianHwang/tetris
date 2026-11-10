@@ -15,6 +15,19 @@
         <p class="subtitle">쌓고, 지우고, 더 오래 버텨보세요.</p>
       </header>
 
+      <section class="account-card" aria-label="계정">
+        <form id="auth-form" class="auth-form">
+          <label>이메일<input id="email" type="email" autocomplete="email" required placeholder="player@example.com" /></label>
+          <label>비밀번호<input id="password" type="password" autocomplete="current-password" required minlength="8" placeholder="8자 이상" /></label>
+          <div class="auth-actions">
+            <button id="login-button" class="button button-primary" type="submit">로그인</button>
+            <button id="register-button" class="button button-secondary" type="button">회원가입</button>
+          </div>
+        </form>
+        <div id="account-status" class="account-status" aria-live="polite">로그인하면 게임 기록이 저장됩니다.</div>
+        <button id="logout-button" class="button button-secondary logout-button" type="button" hidden>로그아웃</button>
+      </section>
+
       <section class="game-layout" aria-label="테트리스 게임">
         <div class="board-card">
           <div class="board-topline">
@@ -42,7 +55,7 @@
               <strong id="score">000000</strong>
             </div>
             <div class="stat-card">
-              <span>BEST</span>
+              <span>GLOBAL BEST</span>
               <strong id="best-score">000000</strong>
             </div>
             <div class="stat-card">

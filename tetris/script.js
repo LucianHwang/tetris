@@ -20,6 +20,12 @@ const pauseButton = document.querySelector('#pause-button');
 const restartButton = document.querySelector('#restart-button');
 const levelDownButton = document.querySelector('#level-down');
 const levelUpButton = document.querySelector('#level-up');
+const authForm = document.querySelector('#auth-form');
+const emailInput = document.querySelector('#email');
+const passwordInput = document.querySelector('#password');
+const registerButton = document.querySelector('#register-button');
+const logoutButton = document.querySelector('#logout-button');
+const accountStatus = document.querySelector('#account-status');
 
 let board = [];
 let currentPiece;
@@ -29,7 +35,9 @@ let score = 0;
 let lines = 0;
 let level = 1;
 let selectedLevel = 1;
-let bestScore = Number(localStorage.getItem('block-drop-best')) || 0;
+let bestScore = 0;
+let authToken = localStorage.getItem('block-drop-token');
+let currentUser = null;
 let isPlaying = false;
 let isPaused = false;
 let animationFrame;
@@ -48,6 +56,10 @@ function placeAtSpawn(piece) {
 }
 
 function startGame() {
+  if (!currentUser) {
+    accountStatus.textContent = '게임을 시작하려면 로그인 또는 회원가입이 필요합니다.';
+    return;
+  }
   cancelAnimationFrame(animationFrame);
   board = createBoard();
   score = 0;
@@ -156,15 +168,12 @@ function clearLines() {
 function endGame() {
   isPlaying = false;
   cancelAnimationFrame(animationFrame);
-  if (score > bestScore) {
-    bestScore = score;
-    localStorage.setItem('block-drop-best', String(bestScore));
-  }
   updateInterface();
   statusText.textContent = '게임 오버';
   pauseButton.disabled = true;
   overlay.innerHTML = '<strong>GAME OVER</strong><span>다시 시작 버튼으로 한 번 더 도전하세요</span>';
   overlay.hidden = false;
+  saveGameRecord();
 }
 
 function togglePause() {
@@ -191,6 +200,91 @@ function updateInterface() {
   const minimumLevel = isPlaying ? selectedLevel + Math.floor(lines / 10) : 1;
   levelDownButton.disabled = level <= minimumLevel;
   levelUpButton.disabled = level >= 11;
+}
+
+async function requestApi(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (authToken) headers.Authorization = `Bearer ${authToken}`;
+  const response = await fetch(path, { ...options, headers });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.detail || '서버 요청에 실패했습니다.');
+  return data;
+}
+
+function updateAccountInterface(message) {
+  const isLoggedIn = Boolean(currentUser);
+  authForm.hidden = isLoggedIn;
+  logoutButton.hidden = !isLoggedIn;
+  startButton.disabled = !isLoggedIn;
+  restartButton.disabled = !isLoggedIn;
+  accountStatus.textContent = isLoggedIn
+    ? (message || `${currentUser.email}님, 플레이 기록이 저장됩니다.`)
+    : (message || '로그인하면 게임 기록이 저장됩니다.');
+}
+
+function applyAuth(data, message) {
+  authToken = data.token;
+  currentUser = data.user;
+  localStorage.setItem('block-drop-token', authToken);
+  passwordInput.value = '';
+  updateAccountInterface(message);
+}
+
+async function authenticate(endpoint) {
+  if (!authForm.reportValidity()) return;
+  const label = endpoint === 'register' ? '회원가입' : '로그인';
+  accountStatus.textContent = `${label} 중…`;
+  try {
+    const data = await requestApi(`/api/auth/${endpoint}`, {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify({ email: emailInput.value, password: passwordInput.value })
+    });
+    applyAuth(data, endpoint === 'register' ? '회원가입 완료! 이제 게임을 시작할 수 있습니다.' : '로그인 완료! 행운을 빕니다.');
+  } catch (error) {
+    updateAccountInterface(error.message);
+  }
+}
+
+async function refreshLeaderboard() {
+  try {
+    const data = await requestApi('/api/leaderboard');
+    bestScore = data.score || 0;
+    updateInterface();
+  } catch (_) {
+    bestScore = 0;
+    updateInterface();
+  }
+}
+
+async function saveGameRecord() {
+  if (!currentUser) return;
+  try {
+    const result = await requestApi('/api/games', {
+      method: 'POST',
+      body: JSON.stringify({ score, lines, level })
+    });
+    bestScore = result.leaderboard.score || 0;
+    updateInterface();
+    if (score === bestScore) accountStatus.textContent = '축하합니다! 현재 전체 최고점수입니다.';
+  } catch (error) {
+    accountStatus.textContent = `기록 저장 실패: ${error.message}`;
+  }
+}
+
+async function restoreSession() {
+  if (!authToken) {
+    updateAccountInterface();
+    return;
+  }
+  try {
+    currentUser = await requestApi('/api/auth/me');
+    updateAccountInterface();
+  } catch (_) {
+    authToken = null;
+    localStorage.removeItem('block-drop-token');
+    updateAccountInterface('세션이 만료되었습니다. 다시 로그인하세요.');
+  }
 }
 
 function draw() {
@@ -279,7 +373,22 @@ levelUpButton.addEventListener('click', () => adjustLevel(1));
 document.querySelectorAll('[data-action]').forEach(button => {
   button.addEventListener('click', () => performAction(button.dataset.action));
 });
+authForm.addEventListener('submit', event => {
+  event.preventDefault();
+  authenticate('login');
+});
+registerButton.addEventListener('click', () => authenticate('register'));
+logoutButton.addEventListener('click', () => {
+  if (isPlaying) endGame();
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('block-drop-token');
+  updateAccountInterface('로그아웃되었습니다.');
+});
 
 board = createBoard();
 updateInterface();
 draw();
+updateAccountInterface();
+refreshLeaderboard();
+restoreSession();

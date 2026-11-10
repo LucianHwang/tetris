@@ -1,2 +1,6 @@
+.venv/
 node_modules/
 coverage/
+__pycache__/
+*.py[cod]
+tetris.db
