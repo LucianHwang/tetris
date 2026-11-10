@@ -1,20 +1,9 @@
-const COLS = 10;
-const ROWS = 20;
+const { COLS, ROWS, SCORE_TABLE, SHAPES, createBoard, shuffle, rotateShape, collides: doesCollide, clearCompletedLines, dropInterval } = TetrisGame;
 const BLOCK_SIZE = 30;
 const COLORS = {
   I: '#55dff5', J: '#6387ff', L: '#ffad5d', O: '#ffe36c',
   S: '#72e59b', T: '#bd7cff', Z: '#ff7189'
 };
-const SHAPES = {
-  I: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-  J: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
-  L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
-  O: [[1, 1], [1, 1]],
-  S: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
-  T: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
-  Z: [[1, 1, 0], [0, 1, 1], [0, 0, 0]]
-};
-const SCORE_TABLE = [0, 100, 300, 500, 800];
 
 const boardCanvas = document.querySelector('#game-board');
 const boardContext = boardCanvas.getContext('2d');
@@ -46,23 +35,10 @@ let isPaused = false;
 let animationFrame;
 let lastDropTime = 0;
 
-function createBoard() {
-  return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-}
-
 function randomPiece() {
   if (!bag.length) bag = shuffle(Object.keys(SHAPES));
   const type = bag.pop();
   return { type, shape: SHAPES[type].map(row => [...row]), x: 0, y: 0 };
-}
-
-function shuffle(items) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const target = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[target]] = [copy[target], copy[index]];
-  }
-  return copy;
 }
 
 function placeAtSpawn(piece) {
@@ -95,16 +71,12 @@ function startGame() {
 
 function gameLoop(timestamp) {
   if (!isPlaying || isPaused) return;
-  if (timestamp - lastDropTime >= dropInterval()) {
+  if (timestamp - lastDropTime >= dropInterval(level)) {
     movePiece(0, 1);
     lastDropTime = timestamp;
   }
   draw();
   animationFrame = requestAnimationFrame(gameLoop);
-}
-
-function dropInterval() {
-  return Math.max(120, 850 - (level - 1) * 70);
 }
 
 function adjustLevel(amount) {
@@ -129,7 +101,7 @@ function movePiece(moveX, moveY) {
 
 function rotatePiece() {
   if (!isPlaying || isPaused) return;
-  const rotated = currentPiece.shape[0].map((_, column) => currentPiece.shape.map(row => row[column]).reverse());
+  const rotated = rotateShape(currentPiece.shape);
   const originalShape = currentPiece.shape;
   currentPiece.shape = rotated;
   for (const offset of [0, -1, 1, -2, 2]) {
@@ -154,12 +126,7 @@ function hardDrop() {
 }
 
 function collides(piece, offsetX, offsetY) {
-  return piece.shape.some((row, y) => row.some((cell, x) => {
-    if (!cell) return false;
-    const boardX = piece.x + x + offsetX;
-    const boardY = piece.y + y + offsetY;
-    return boardX < 0 || boardX >= COLS || boardY >= ROWS || (boardY >= 0 && board[boardY][boardX]);
-  }));
+  return doesCollide(board, piece, offsetX, offsetY);
 }
 
 function lockPiece() {
@@ -177,14 +144,9 @@ function lockPiece() {
 
 function clearLines() {
   let cleared = 0;
-  board = board.filter(row => {
-    if (row.every(Boolean)) {
-      cleared += 1;
-      return false;
-    }
-    return true;
-  });
-  while (board.length < ROWS) board.unshift(Array(COLS).fill(null));
+  const result = clearCompletedLines(board);
+  board = result.board;
+  cleared = result.cleared;
   if (!cleared) return;
   lines += cleared;
   score += SCORE_TABLE[cleared] * level;
