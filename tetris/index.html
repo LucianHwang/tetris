@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Block Drop — 테트리스</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">ARCADE MODE</p>
+        <h1>BLOCK <span>DROP</span></h1>
+        <p class="subtitle">쌓고, 지우고, 더 오래 버텨보세요.</p>
+      </header>
+
+      <section class="game-layout" aria-label="테트리스 게임">
+        <div class="board-card">
+          <div class="board-topline">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="game-status" aria-live="polite">시작할 준비 완료</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="game-board" width="300" height="600" aria-label="테트리스 게임 보드"></canvas>
+            <div id="game-overlay" class="game-overlay">
+              <strong>READY?</strong>
+              <span>시작 버튼을 눌러 게임을 시작하세요</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-panel" aria-label="게임 정보">
+          <section class="info-card next-card">
+            <h2>NEXT</h2>
+            <canvas id="next-piece" width="120" height="120" aria-label="다음 블록"></canvas>
+          </section>
+
+          <section class="stats-grid" aria-label="점수 정보">
+            <div class="stat-card score-card">
+              <span>SCORE</span>
+              <strong id="score">000000</strong>
+            </div>
+            <div class="stat-card">
+              <span>BEST</span>
+              <strong id="best-score">000000</strong>
+            </div>
+            <div class="stat-card">
+              <span>LEVEL</span>
+              <div class="level-control">
+                <button id="level-down" type="button" aria-label="레벨 낮추기">−</button>
+                <strong id="level">01</strong>
+                <button id="level-up" type="button" aria-label="레벨 높이기">+</button>
+              </div>
+            </div>
+            <div class="stat-card">
+              <span>LINES</span>
+              <strong id="lines">00</strong>
+            </div>
+          </section>
+
+          <div class="action-buttons">
+            <button id="start-button" class="button button-primary" type="button">게임 시작</button>
+            <button id="pause-button" class="button button-secondary" type="button" disabled>일시정지</button>
+            <button id="restart-button" class="button button-secondary" type="button">다시 시작</button>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mobile-controls" aria-label="모바일 게임 조작">
+        <button type="button" data-action="left" aria-label="왼쪽으로 이동">←</button>
+        <button type="button" data-action="rotate" class="rotate" aria-label="블록 회전">↻</button>
+        <button type="button" data-action="right" aria-label="오른쪽으로 이동">→</button>
+        <button type="button" data-action="down" aria-label="빠르게 내리기">↓</button>
+        <button type="button" data-action="drop" class="drop" aria-label="즉시 낙하">⇣</button>
+      </section>
+
+      <section class="guide-card" aria-label="조작 방법">
+        <p><kbd>←</kbd><kbd>→</kbd> 이동</p>
+        <p><kbd>↑</kbd> 회전</p>
+        <p><kbd>↓</kbd> 빠른 낙하</p>
+        <p><kbd>SPACE</kbd> 즉시 낙하</p>
+        <p><kbd>P</kbd> 일시정지</p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

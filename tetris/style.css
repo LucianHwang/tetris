@@ -1,0 +1,102 @@
+:root {
+  color-scheme: dark;
+  font-family: "Arial Rounded MT Bold", "Pretendard", system-ui, sans-serif;
+  background: #0d111d;
+  color: #f7f8ff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: radial-gradient(circle at 18% 0%, #29385f 0, transparent 32rem), radial-gradient(circle at 92% 80%, #3c2158 0, transparent 30rem), #0d111d;
+}
+
+button, kbd { font: inherit; }
+
+.app-shell {
+  width: min(100% - clamp(24px, 5vw, 64px), 900px);
+  margin: 0 auto;
+  padding: clamp(24px, 6vh, 56px) 0 clamp(24px, 5vh, 40px);
+}
+
+.hero { margin-bottom: 28px; text-align: center; }
+.eyebrow { margin: 0 0 7px; color: #a7b2d7; font-size: .7rem; font-weight: 800; letter-spacing: .24em; }
+h1 { margin: 0; font-size: clamp(2.2rem, 7vw, 3.8rem); font-weight: 950; letter-spacing: -.08em; line-height: .9; }
+h1 span { color: #6de5ff; text-shadow: 0 0 24px #3eaec4; }
+.subtitle { margin: 13px 0 0; color: #b8bed2; font-size: .94rem; }
+
+.game-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(200px, 230px); gap: clamp(12px, 2vw, 18px); align-items: start; }
+.board-card, .info-card, .stat-card, .guide-card { background: rgba(22, 28, 46, .92); border: 1px solid rgba(176, 194, 255, .14); box-shadow: 0 18px 45px rgba(0, 0, 0, .22); }
+.board-card { border-radius: 22px; padding: 12px; }
+.board-topline { display: flex; align-items: center; gap: 8px; height: 28px; color: #c9d0e6; font-size: .76rem; font-weight: 700; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #65e5a2; box-shadow: 0 0 10px #65e5a2; }
+.canvas-wrap { position: relative; width: min(100%, 370px); margin: 0 auto; overflow: hidden; border-radius: 13px; background: #101522; }
+#game-board { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.game-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 20px; text-align: center; background: rgba(10, 14, 26, .75); backdrop-filter: blur(3px); transition: opacity .2s ease; }
+.game-overlay[hidden] { display: none; }
+.game-overlay strong { color: #6de5ff; font-size: 2.2rem; letter-spacing: -.06em; }
+.game-overlay span { color: #d6daea; font-size: .82rem; }
+
+.side-panel { display: grid; gap: 12px; }
+.info-card { border-radius: 18px; padding: 15px; }
+.info-card h2 { margin: 0; color: #a7b2d7; font-size: .68rem; letter-spacing: .15em; }
+#next-piece { display: block; width: 100%; max-width: 120px; height: auto; margin: 2px auto -8px; image-rendering: pixelated; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card { min-height: 78px; border-radius: 16px; padding: 12px; }
+.stat-card span { display: block; color: #98a3c8; font-size: .62rem; font-weight: 800; letter-spacing: .12em; }
+.stat-card strong { display: block; margin-top: 8px; font-size: 1.22rem; letter-spacing: -.04em; }
+.level-control { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+.level-control strong { margin: 0; }
+.level-control button { width: 24px; height: 24px; border: 1px solid #4c587c; border-radius: 7px; color: #dce4ff; background: #27314d; cursor: pointer; font-size: 1.05rem; font-weight: 800; line-height: 1; }
+.level-control button:hover { color: #0b1930; background: #6de5ff; }
+.level-control button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.score-card { grid-column: span 2; background: linear-gradient(135deg, #253968, #253052); }
+.score-card strong { color: #6de5ff; font-size: 1.62rem; }
+.action-buttons { display: grid; gap: 8px; }
+.button { min-height: 43px; border: 1px solid transparent; border-radius: 12px; cursor: pointer; font-size: .82rem; font-weight: 800; transition: transform .15s, filter .15s, background .15s; }
+.button:hover:not(:disabled) { filter: brightness(1.13); transform: translateY(-1px); }
+.button:focus-visible, .mobile-controls button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.button:disabled { cursor: not-allowed; opacity: .45; }
+.button-primary { color: #0b1930; background: #6de5ff; box-shadow: 0 7px 20px rgba(109, 229, 255, .18); }
+.button-secondary { color: #d9dff5; background: #242c43; border-color: #414c70; }
+
+.mobile-controls { display: none; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px auto 0; max-width: 420px; }
+.mobile-controls button { min-height: 48px; border: 1px solid #414c70; border-radius: 12px; color: #e9edff; background: #202943; cursor: pointer; font-size: 1.28rem; font-weight: 800; touch-action: manipulation; }
+.mobile-controls .rotate { color: #6de5ff; }
+.mobile-controls .drop { color: #ffc46c; }
+
+.guide-card { display: flex; flex-wrap: wrap; justify-content: center; gap: 11px 18px; margin-top: 18px; padding: 13px; border-radius: 16px; color: #aeb7d2; font-size: .73rem; }
+.guide-card p { display: flex; align-items: center; gap: 5px; margin: 0; }
+kbd { padding: 2px 5px; border: 1px solid #4c587c; border-bottom-width: 2px; border-radius: 4px; color: #e8ebf6; background: #242c43; font-size: .66rem; }
+
+@media (max-width: 680px) {
+  .app-shell { width: min(100% - 24px, 450px); }
+  .hero { margin-bottom: 20px; }
+  .game-layout { grid-template-columns: 1fr; }
+  .side-panel { grid-template-columns: 120px 1fr; }
+  .next-card { grid-row: span 2; }
+  .stats-grid { gap: 8px; }
+  .stat-card { min-height: 66px; padding: 10px; }
+  .action-buttons { grid-column: span 2; grid-template-columns: 1.2fr 1fr 1fr; }
+  .mobile-controls { display: grid; }
+  .guide-card { display: none; }
+}
+
+@media (max-width: 380px) {
+  .side-panel { grid-template-columns: 1fr; }
+  .next-card { grid-row: auto; }
+  .action-buttons { grid-column: auto; grid-template-columns: 1fr; }
+}
+
+@media (max-height: 760px) and (max-width: 680px) {
+  .hero { margin-bottom: 14px; }
+  .subtitle { display: none; }
+  .canvas-wrap { width: min(100%, 280px); }
+  .side-panel { gap: 8px; }
+  .info-card { padding: 10px; }
+  .mobile-controls { margin-top: 10px; }
+}
